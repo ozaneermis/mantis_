@@ -31,6 +31,8 @@
  * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
  */
+ //Ozan Düzenleme
+$g_ali_MultiLogin = False; 
 
 ##############################
 # MantisBT Database Settings #
@@ -626,6 +628,14 @@ $g_show_user_email_threshold = NOBODY;
  * @global integer $g_show_user_realname_threshold
  */
 $g_show_user_realname_threshold = NOBODY;
+
+/**
+ * This specifies the access level that is needed to see department on user view
+ * page
+ * @see $g_show_department
+ * @global integer $g_show_user_department_threshold
+ */
+$g_show_user_department_threshold = NOBODY;
 
 /**
  * select the method to mail by:
@@ -1226,6 +1236,14 @@ $g_show_version_dates_threshold = NOBODY;
  * @global integer $g_show_realname
  */
 $g_show_realname = OFF;
+
+/**
+ * show users with their real name or not
+ * @see $g_sort_by_last_name
+ * @see $g_show_user_realname_threshold
+ * @global integer $g_show_department
+ */
+$g_show_department = OFF;
 
 /**
  * sorting for names in dropdown lists. If turned on, "Jane Doe" will be sorted
@@ -2124,11 +2142,24 @@ $g_ldap_uid_field = 'uid';
 $g_ldap_realname_field = 'cn';
 
 /**
+ * The LDAP field for the user's department  (i.e.department).
+ * @global string $g_ldap_department_field
+ */
+$g_ldap_department_field = 'department';
+
+/**
  * Use the realname specified in LDAP (ON) rather than the one stored in the
  * database (OFF).
  * @global integer $g_use_ldap_realname
  */
 $g_use_ldap_realname = OFF;
+
+/**
+ * Use the department specified in LDAP (ON) rather than the one stored in the
+ * database (OFF).
+ * @global integer $g_use_ldap_department
+ */
+$g_use_ldap_department = OFF;
 
 /**
  * Use the email address specified in LDAP (ON) rather than the one stored
@@ -2145,6 +2176,7 @@ $g_use_ldap_email = OFF;
  *   - Each line has 4 comma-delimited fields
  *        - username,
  *        - realname,
+ * 		  - department,
  *        - e-mail,
  *        - password
  *   - Any extra fields are ignored
@@ -2153,6 +2185,9 @@ $g_use_ldap_email = OFF;
  */
 $g_ldap_simulation_file_path = '';
 
+//Düzenleme Ozan
+//Ldap Giriş Engellemesi İçin Kullanılacak config dosyasında düzenlenecek.
+$g_ldap_engelli =''; 
 ###################
 # Status Settings #
 ###################
@@ -4621,11 +4656,13 @@ $g_public_config_names = array(
 	'show_project_menu_bar',
 	'show_queries_count',
 	'show_realname',
+	'show_department',
 	'show_roadmap_dates',
 	'show_sticky_issues',
 	'show_timer',
 	'show_user_email_threshold',
 	'show_user_realname_threshold',
+	'show_user_department_threshold',
 	'show_version_dates_threshold',
 	'show_version',
 	'signup_use_captcha',

@@ -141,6 +141,19 @@ print_manage_menu( 'manage_user_page.php' );
 				<td><input id="edit-realname" type="text" class="input-sm" size="32" maxlength="<?php echo DB_FIELD_SIZE_REALNAME;?>" name="realname" value="<?php echo string_attribute( $t_user['realname'] ) ?>" /></td><?php
 			}
 		?>
+		<tr><?php
+			if( $t_ldap && ON == config_get( 'use_ldap_department' ) ) {
+				# With LDAP
+				echo '<td class="category">' . lang_get( 'department_label' ) . '</td>';
+				echo '<td>';
+				echo string_display_line( user_get_department( $t_user_id ) );
+				echo '</td>';
+			} else {
+				# Without LDAP ?>
+				<td class="category"><?php echo lang_get( 'department_label' ) ?></td>
+				<td><input id="edit-department" type="text" class="input-sm" size="32" maxlength="<?php echo DB_FIELD_SIZE_DEPARTMENT;?>" name="department" value="<?php echo string_attribute( $t_user['department'] ) ?>" /></td><?php
+			}
+		?>
 			</tr>
 			<!-- Email -->
 			<tr><?php

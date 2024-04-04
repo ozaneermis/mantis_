@@ -61,6 +61,7 @@ $f_email           = gpc_get_string( 'email', '' );
 $f_access_level    = gpc_get_string( 'access_level' );
 $f_protected       = gpc_get_bool( 'protected' );
 $f_enabled         = gpc_get_bool( 'enabled' );
+$f_department 	   =  gpc_get_string( 'department', '' );
 
 if( $f_password != $f_password_verify ) {
 	trigger_error( ERROR_USER_CREATE_PASSWORD_MISMATCH, ERROR );
@@ -84,6 +85,7 @@ $t_data = array(
 		'email' => $f_email,
 		'access_level' => array( 'id' => $f_access_level ),
 		'real_name' => $f_realname,
+		'department' => $f_department,
 		'password' => $f_password,
 		'protected' => $f_protected,
 		'enabled' => $f_enabled

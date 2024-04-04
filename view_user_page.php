@@ -66,6 +66,8 @@ $t_can_manage = access_has_global_level( config_get( 'manage_user_threshold' ) )
 
 $t_can_see_realname = $t_can_manage || user_show_realname() ||
     access_has_project_level( config_get( 'show_user_realname_threshold' ) );
+$t_can_see_department = $t_can_manage || user_show_department() ||
+    access_has_project_level( config_get( 'show_user_department_threshold' ) );
 $t_can_see_email = $t_can_manage || access_has_project_level( config_get( 'show_user_email_threshold' ) );
 $t_can_impersonate = auth_can_impersonate( $f_user_id );
 
@@ -73,7 +75,7 @@ $t_can_impersonate = auth_can_impersonate( $f_user_id );
 #  that version instead of the one in the DB
 $u_email = user_get_email( $u_id );
 $u_realname = user_get_realname( $u_id );
-
+$u_department = user_get_department( $u_id );
 $t_date_format = config_get( 'normal_date_format' );
 
 layout_page_header();
@@ -111,6 +113,17 @@ $t_timeline_view_class = ( $t_timeline_view_threshold_access ) ? "col-md-7" : "c
 				</th>
 				<td>
 					<?php echo string_display_line( $u_realname ); ?>
+				</td>
+			</tr>
+	<?php } ?>
+	<?php
+		if( $t_can_see_department ) { ?>
+			<tr>
+				<th class="category">
+					<?php echo lang_get( 'department' ) ?>
+				</th>
+				<td>
+					<?php echo string_display_line( $u_department ); ?>
 				</td>
 			</tr>
 	<?php } ?>

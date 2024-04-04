@@ -222,13 +222,15 @@ if( $f_search !== '' ) {
         }
 
         $c_search = '%' . $t_search_term . '%';
-        $t_where .= '( ' . db_helper_like( 'realname' ) .
+        $t_where .= '( ' . db_helper_like( 'realname' ) . 
+		//	' OR ' . db_helper_like( 'department' ) .
             ' OR ' . db_helper_like( 'username' ) .
             ' OR ' . db_helper_like( 'email' );
 
         $t_where_params[] = $c_search;
+        //$t_where_params[] = $c_search;
         $t_where_params[] = $c_search;
-        $t_where_params[] = $c_search;
+		$t_where_params[] = $c_search;
 
         $t_where .= ' )';
         $t_first = false;
@@ -342,7 +344,7 @@ $t_user_count = count( $t_users );
 	# Print column headers with sort links
 	$t_columns = array(
 		'username', 'realname', 'email', 'access_level',
-		'enabled', 'protected', 'date_created', 'last_visit'
+		'enabled', 'protected', 'date_created', 'last_visit','department',
 	);
 
 	foreach( $t_columns as $t_col ) {
@@ -382,6 +384,7 @@ $t_user_count = count( $t_users );
 					} ?>
 				</td>
 				<td><?php echo string_display_line( $u_realname ) ?></td>
+				
 				<td><?php print_email_link( $u_email, $u_email ) ?></td>
 				<td><?php echo $t_access_level[$u_access_level] ?></td>
 				<td class="center"><?php echo trans_bool( $u_enabled ) ?></td>
@@ -394,6 +397,7 @@ $t_user_count = count( $t_users );
 				</td>
 				<td><?php echo $u_date_created ?></td>
 				<td><?php echo $u_last_visit ?></td>
+				<td><?php echo string_display_line( $u_department ) ?></td>
 			</tr>
 <?php
 	}  # end for

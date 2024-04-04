@@ -83,7 +83,8 @@ print_manage_menu( 'manage_user_create_page.php' );
 					<input type="text" id="user-username" name="username" class="input-sm" size="32" maxlength="<?php echo DB_FIELD_SIZE_USERNAME;?>" />
 				</td>
 			</tr><?php
-			if( !$t_ldap || config_get( 'use_ldap_realname' ) == OFF ) { ?>
+			//Ozan Düzenleme !$t_ldap değili kaldırıldı  $t_ldap olarak kullanılacak 
+			if( $t_ldap || config_get( 'use_ldap_realname' ) == OFF ) { ?>
 			<tr>
 				<td class="category">
 					<?php echo lang_get( 'realname' ) ?>
@@ -92,8 +93,20 @@ print_manage_menu( 'manage_user_create_page.php' );
 					<input type="text" id="user-realname" name="realname" class="input-sm" size="32" maxlength="<?php echo DB_FIELD_SIZE_REALNAME;?>" />
 				</td>
 			</tr><?php
+			//Ozan Düzenleme !$t_ldap değili kaldırıldı  $t_ldap olarak kullanılacak
+			if( $t_ldap || config_get( 'use_ldap_department' ) == OFF ) { ?>
+			<tr>
+				<td class="category">
+					<?php echo lang_get( 'department' ) ?>
+				</td>
+				<td>
+					<input type="text" id="user-department" name="department" class="input-sm" size="32" maxlength="<?php echo DB_FIELD_SIZE_DEPARTMENT;?>" />
+				</td>
+			</tr><?php
 			}
-			if( !$t_ldap || config_get( 'use_ldap_email' ) == OFF ) { ?>
+			}
+			//Ozan Düzenleme !$t_ldap değili kaldırıldı  $t_ldap olarak kullanılacak 
+			if( $t_ldap || config_get( 'use_ldap_email' ) == OFF ) { ?>
 			<tr>
 				<td class="category">
 					<?php echo lang_get( 'email' ) ?>

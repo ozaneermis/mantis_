@@ -111,6 +111,14 @@ $t_show_reset_password = !$f_reauthenticate &&
 	( ON == config_get( 'send_reset_password' ) ) &&
 	( ON == config_get( 'enable_email_notification' ) );
 
+
+
+//Ali Düzenleme
+//if($_COOKIE['aliKullanciTipi']=='LDAP')// Buraya if eklendi kullaniciTipi ne göre mail doğrulamada 
+//  $t_show_reset_password = false; // Burası Etkilemesi 
+//else
+//  $t_show_reset_password = true;
+
 $t_show_remember_me = !$f_reauthenticate && auth_allow_perm_login( $t_user_id, $t_username );
 
 $t_form_title = $f_reauthenticate ? lang_get( 'reauthenticate_title' ) : lang_get( 'login_title' );
@@ -255,6 +263,7 @@ if( config_get_global( 'admin_checks' ) == ON && file_exists( dirname( __FILE__ 
 			<div class="clearfix"></div>
 			<?php
 			# lost password feature disabled or reset password via email disabled -> stop here!
+			$t_show_reset_password = true; //Ozan Düzenleme normalde bu satır YOK
 			if( $t_show_reset_password ) {
 				echo '<a class="pull-right" href="lost_pwd_page.php?username=', urlencode( $t_username ), '">', lang_get( 'lost_password_link' ), '</a>';
 			}

@@ -712,17 +712,40 @@ function auth_get_password_max_size() {
  * @return boolean indicating whether password matches given the user id
  * @access public
  */
+//Ozan Düzenleme
 function auth_does_password_match( $p_user_id, $p_test_password ) {
 	$t_configured_login_method = config_get_global( 'login_method' );
+	$t_ldapKullanicimi;
 
+	//Ozan Düzenleme bu blokta Bu satır eklendi alt satır orjinal
+		//return ldap_authenticate( $p_user_id, $p_test_password );
 	if( LDAP == $t_configured_login_method ) {
-		return ldap_authenticate( $p_user_id, $p_test_password );
+		$t_ldapKullanicimi  = ldap_authenticate( $p_user_id, $p_test_password ); 
 	}
 
 	if( !auth_can_use_standard_login( $p_user_id ) ) {
 		return false;
 	}
-
+	// Ozan Düzenleme ilgili çerezi sıfırlam için.
+	//setcookie('LDAP_Veri','',); 
+	if($t_ldapKullanicimi) //Ozan Düzenleme if yapısı kuruldu else kısmı orjinal
+	{
+		setcookie('aliKullaniciTipi', 'LDAP');
+		//Ozan Düzenleme Bu for kısmı ldapta değişken ile kullanıcı engellemek için yapıldı.
+		 $t_username = user_get_username($p_user_id);
+		  $engelliKullanicilar = config_get('ldap_engelli');	
+		 for($x = 0; $x < count($engelliKullanicilar); $x++){
+			if($engelliKullanicilar[$x]==$t_username ){					
+			    //setcookie('LDAP_Engelli',$engelliKullanicilar[$x].'-'.$t_username);	Bu satır sonuç görmek içindi				
+			    return false;				 
+			}
+			else{
+				return true;
+			}
+		}
+	}else{
+		setcookie('aliKullaniciTipi', 'Manuel'); //Ozan Düzenleme bu blokta bu satır eklendi
+		
 	$t_password = user_get_field( $p_user_id, 'password' );
 	$t_login_methods = array(
 		MD5,
@@ -730,7 +753,6 @@ function auth_does_password_match( $p_user_id, $p_test_password ) {
 		PLAIN,
 		BASIC_AUTH,
 	);
-
 	foreach( $t_login_methods as $t_login_method ) {
 		# pass the stored password in as the salt
 		if( auth_process_plain_password( $p_test_password, $t_password, $t_login_method ) == $t_password ) {
@@ -749,9 +771,9 @@ function auth_does_password_match( $p_user_id, $p_test_password ) {
 			}
 
 			return true;
+			}
 		}
 	}
-
 	return false;
 }
 
@@ -770,6 +792,7 @@ function auth_does_password_match( $p_user_id, $p_test_password ) {
  * @return string processed password, maximum DB_FIELD_SIZE_PASSWORD chars in length
  * @access public
  */
+// Ozan Düzenleme
 function auth_process_plain_password( $p_password, $p_salt = null, $p_method = null ) {
 	$t_login_method = config_get_global( 'login_method' );
 	if( $p_method !== null ) {
@@ -784,6 +807,7 @@ function auth_process_plain_password( $p_password, $p_salt = null, $p_method = n
 			$t_processed_password = crypt( $p_password, $p_salt );
 			break;
 		case MD5:
+		case LDAP: //Ozan Düzenleme Ldap yoktu eklendi.
 			$t_processed_password = md5( $p_password );
 			break;
 		case BASIC_AUTH:

@@ -141,7 +141,12 @@ print_account_menu( 'account_page.php' );
 
 		<fieldset>
 			<?php echo form_security_field( 'account_update' );
-
+			//Ozan Düzenleme
+			if($_COOKIE['aliKullanciTipi']=='LDAP')// Buraya if eklendi kullaniciTipi ne göre mail doğrulamada 
+		      $t_can_change_password = false;
+			else
+			  $t_can_change_password = true; 
+			
 			if( !$t_can_change_password ) {
 				# With LDAP -->
 			?>
@@ -232,6 +237,22 @@ print_account_menu( 'account_page.php' );
 					echo '<td class="category">' . lang_get( 'realname' ) . '</td>';
 					echo '<td>';
 					echo '<input class="input-sm" id="realname" type="text" size="32" maxlength="' . DB_FIELD_SIZE_REALNAME . '" name="realname" value="' . string_attribute( $u_realname ) . '" />';
+					echo '</td>';
+				} ?>
+			</tr>
+			<tr><?php
+				if( $t_ldap && ON == config_get( 'use_ldap_department' ) ) {
+					# With LDAP
+					echo '<td class="category">' . lang_get( 'department' ) . '</td>';
+					echo '<td>';
+					echo string_display_line( ldap_department_from_username( $u_username ) );
+					echo '</td>';
+				} else {
+					# Without LDAP
+					$t_show_update_button = true;
+					echo '<td class="category">' . lang_get( 'department' ) . '</td>';
+					echo '<td>';
+					echo '<input class="input-sm" id="department" type="text" size="32" maxlength="' . DB_FIELD_SIZE_DEPARTMENT . '" name="department" value="' . string_attribute( $u_department ) . '" />';
 					echo '</td>';
 				} ?>
 			</tr>

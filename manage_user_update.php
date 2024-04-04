@@ -69,6 +69,7 @@ $f_enabled		= gpc_get_bool( 'enabled' );
 $f_email		= gpc_get_string( 'email', '' );
 $f_username		= gpc_get_string( 'username', '' );
 $f_realname		= gpc_get_string( 'realname', '' );
+$f_department	= gpc_get_string( 'department', '' );
 $f_access_level	= gpc_get_int( 'access_level' );
 $f_user_id		= gpc_get_int( 'user_id' );
 
@@ -90,6 +91,7 @@ $t_old_access_level = $t_user['access_level'];
 if( $f_send_email_notification ) {
 	$t_old_realname = $t_user['realname'];
 	$t_old_email = $t_user['email'];
+	$t_old_department = $t_user['department'];
 }
 
 # Ensure that the account to be updated is of equal or lower access to the
@@ -112,6 +114,13 @@ if( $t_ldap && config_get( 'use_ldap_realname' ) ) {
 	# strip extra space from real name
 	$t_realname = string_normalize( $f_realname );
 }
+if( $t_ldap && config_get( 'use_ldap_department' ) ) {
+	$t_department = ldap_department_from_username( $f_username );
+} else {
+	# strip extra space from real name
+	$t_department = string_normalize( $f_department );
+}
+
 
 if( $t_ldap && config_get( 'use_ldap_email' ) ) {
 	$t_email = ldap_email( $f_user_id );
@@ -125,6 +134,7 @@ if( $t_ldap && config_get( 'use_ldap_email' ) ) {
 $c_email = $t_email;
 $c_username = $f_username;
 $c_realname = $t_realname;
+$c_department = $t_department;
 $c_protected = (bool)$f_protected;
 $c_enabled = (bool)$f_enabled;
 $c_user_id = (int)$f_user_id;
@@ -159,19 +169,23 @@ if( ( $f_access_level != $t_old_access_level ) && ( $f_access_level >= $t_admin_
 $t_query_params = array();
 if( $f_protected && $t_old_protected ) {
 	$t_query = 'UPDATE {user}
-			SET username=' . db_param() . ', email=' . db_param() . ',
-				protected=' . db_param() . ', realname=' . db_param() . '
+			SET username=' . db_param() . ', 
+				email=' . db_param() . ',
+				protected=' . db_param() . ',
+				realname=' . db_param() . ',
+				department=' . db_param() . ' 
 			WHERE id=' . db_param();
-	$t_query_params = array( $c_username, $c_email, $c_protected, $c_realname, $c_user_id );
+	$t_query_params = array( $c_username, $c_email, $c_protected, $c_realname, $c_department, $c_user_id );
 	# Prevent e-mail notification for a change that did not happen
 	$f_access_level = $t_old_access_level;
 } else {
 	$t_query = 'UPDATE {user}
 			SET username=' . db_param() . ', email=' . db_param() . ',
 				access_level=' . db_param() . ', enabled=' . db_param() . ',
-				protected=' . db_param() . ', realname=' . db_param() . '
+				protected=' . db_param() . ', realname=' . db_param() . ',
+                department=' . db_param() . '
 			WHERE id=' . db_param();
-	$t_query_params = array( $c_username, $c_email, $c_access_level, $c_enabled, $c_protected, $c_realname, $c_user_id );
+	$t_query_params = array( $c_username, $c_email, $c_access_level, $c_enabled, $c_protected, $c_realname,  $c_department ,$c_user_id );
 }
 
 $t_result = db_query( $t_query, $t_query_params );
@@ -189,7 +203,9 @@ if( $f_send_email_notification ) {
 	if( strcmp( $t_realname, $t_old_realname ) ) {
 		$t_changes .= lang_get( 'realname_label' ) . ' ' . $t_old_realname . ' => ' . $t_realname . "\n";
 	}
-
+	if( strcmp( $t_department, $t_old_department  ) ) {
+		$t_changes .= lang_get( 'department_label' ) . ' ' . $t_old_department . ' => ' . $t_department . "\n";
+	}
 	if( strcmp( $t_email, $t_old_email ) ) {
 		$t_changes .= lang_get( 'email_label' ) . ' ' . $t_old_email . ' => ' . $t_email . "\n";
 	}

@@ -44,6 +44,8 @@ function mci_account_get_array_by_id( $p_user_id ) {
 
 		$t_can_see_realname = $t_is_same_user || $t_can_manage || user_show_realname() ||
 			access_has_project_level( config_get( 'show_user_realname_threshold' ) );
+		$t_can_see_department = $t_is_same_user || $t_can_manage || user_show_department() ||
+			access_has_project_level( config_get( 'show_user_department_threshold' ) );
 		$t_can_see_email = $t_is_same_user || $t_can_manage ||
 			access_has_project_level( config_get( 'show_user_email_threshold' ) );
 
@@ -54,6 +56,13 @@ function mci_account_get_array_by_id( $p_user_id ) {
 
 			if( !empty( $t_realname ) ) {
 				$t_result['real_name'] = $t_realname;
+			}
+		}
+		if ( $t_can_see_department ) {
+			$t_department = user_get_department( $p_user_id );
+
+			if( !empty( $t_department ) ) {
+				$t_result['department'] = $t_department;
 			}
 		}
 

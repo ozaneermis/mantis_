@@ -159,7 +159,15 @@ function ldap_email_from_username( $p_username ) {
 function ldap_realname( $p_user_id ) {
 	return ldap_realname_from_username( user_get_username( $p_user_id ) );
 }
-
+/**
+ * Gets a user's real name (common name) given the id.
+ *
+ * @param integer $p_user_id The user id.
+ * @return string department
+ */
+function ldap_department( $p_user_id ) {
+	return ldap_department_from_username( user_get_username( $p_user_id ) );
+}
 /**
  * Gets a user real name given their user name.
  * @param string $p_username The user's name.
@@ -174,7 +182,15 @@ function ldap_realname_from_username( $p_username ) {
 	}
 	return $t_realname;
 }
-
+function ldap_department_from_username( $p_username ) {
+	if( ldap_simulation_is_enabled() ) {
+		$t_department = ldap_simulatiom_department_from_username( $p_username );
+	} else {
+		$t_ldap_department_field = config_get( 'ldap_department_field' );
+		$t_department = (string)ldap_get_field_from_username( $p_username, $t_ldap_department_field );
+	}
+	return $t_department;
+}
 /**
  * Escapes the LDAP string to disallow injection.
  *
@@ -196,7 +212,7 @@ function ldap_escape_string( $p_string ) {
  * Uses a single LDAP query to retrieve the following fields:
  * - email (mail)
  * - realname {@see $g_ldap_realname_field}
- *
+ * - department {@see $g_ldap_department_field}
  * @param string $p_username The username.
  *
  * @return array|false User data, false if not found or errors occurred
@@ -229,7 +245,8 @@ function ldap_cache_user_data( $p_username ) {
 		. '(' . $t_ldap_uid_field . '=' . ldap_escape_string( $p_username ) . '))';
 	$t_search_attrs = array(
 		'mail',
-		config_get( 'ldap_realname_field' )
+		config_get( 'ldap_realname_field' ),
+		//config_get( 'ldap_department_field' )
 	);
 
 	log_event( LOG_LDAP, 'Searching for ' . $t_search_filter );
@@ -334,7 +351,8 @@ function ldap_authenticate_by_username( $p_username, $p_password ) {
 		$t_search_filter = '(&' . $t_ldap_organization . '(' . $t_ldap_uid_field . '=' . $c_username . '))';
 		$t_search_attrs = array(
 			$t_ldap_uid_field,
-			'dn',
+			//Ozan Düzenleme Bilgiler gelmesi için ekleme yapılmalı 'telephonenumber','title' Sonradan eklendi
+			'dn','cn','department','telephonenumber','st','title'
 		);
 
 		# Bind and connect.
@@ -365,6 +383,11 @@ function ldap_authenticate_by_username( $p_username, $p_password ) {
 			# Try to authenticate to each until we get a match
 			for( $i = 0; $i < $t_info['count']; $i++ ) {
 				$t_dn = $t_info[$i]['dn'];
+
+				//Ozan Düzenleme ldaptan gelen veriler çereze yazılır ki başka sayfada kullanılabilsin.       
+                setcookie('LDAP_Veri',$t_info[0]['title'][0].'-'.$t_info[0]['telephonenumber'][0].'-'.$t_info[0]['department'][0]);
+
+				
 				log_event( LOG_LDAP, 'Checking ' . $t_info[$i]['dn'] );
 
 				# Attempt to bind with the DN and password
@@ -393,6 +416,9 @@ function ldap_authenticate_by_username( $p_username, $p_password ) {
 
 			if( ON == config_get( 'use_ldap_realname' ) ) {
 				$t_fields_to_update['realname'] = ldap_realname_from_username( $p_username );
+			}
+			if( ON == config_get( 'use_ldap_department' ) ) {
+				$t_fields_to_update['department'] = ldap_department_from_username( $p_username );
 			}
 
 			if( ON == config_get( 'use_ldap_email' ) ) {
@@ -445,8 +471,9 @@ function ldap_simulation_get_user( $p_username ) {
 
 		$t_user['username'] = $t_row[0];
 		$t_user['realname'] = $t_row[1];
-		$t_user['email'] = $t_row[2];
-		$t_user['password'] = $t_row[3];
+		$t_user['department'] = $t_row[2];
+		$t_user['email'] = $t_row[3];
+		$t_user['password'] = $t_row[4];
 
 		return $t_user;
 	}
@@ -477,6 +504,7 @@ function ldap_simulation_email_from_username( $p_username ) {
  *
  * @param string $p_username The username.
  * @return string The real name or an empty string if not found.
+ * @return string The department or an empty string if not found.
  */
 function ldap_simulatiom_realname_from_username( $p_username ) {
 	$t_user = ldap_simulation_get_user( $p_username );
@@ -489,6 +517,16 @@ function ldap_simulatiom_realname_from_username( $p_username ) {
 	return $t_user['realname'];
 }
 
+function ldap_simulatiom_department_from_username( $p_username ) {
+	$t_user = ldap_simulation_get_user( $p_username );
+	if( $t_user === null ) {
+		log_event( LOG_LDAP, 'ldap_simulatiom_department_from_username: user \'' . $p_username . '\' not found.' );
+		return '';
+	}
+
+	log_event( LOG_LDAP, 'ldap_simulatiom_department_from_username: user \'' . $p_username . '\' has department \'' . $t_user['department'] . '\'.' );
+	return $t_user['department'];
+}
 /**
  * Authenticates the specified user id / password based on the simulation data.
  *

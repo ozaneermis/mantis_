@@ -44,7 +44,8 @@ require_api( 'print_api.php' );
 require_css( 'login.css' );
 
 # lost password feature disabled or reset password via email disabled -> stop here!
-if( LDAP == config_get_global( 'login_method' ) ||
+//Ozan Düzenle Alt satırda !LDAP olarak ayarlandı normali LDAP
+if( !LDAP == config_get_global( 'login_method' ) ||
 	OFF == config_get( 'lost_password_feature' ) ||
 	OFF == config_get( 'send_reset_password' )  ||
 	OFF == config_get( 'enable_email_notification' ) ) {
@@ -86,8 +87,9 @@ layout_login_page_begin();
 		<fieldset>
 			<?php
 			echo form_security_field( 'lost_pwd' );
-
-			$t_allow_passwd = auth_can_set_password();
+			// Ozan Düzenleme
+			//$t_allow_passwd = auth_can_set_password();
+			$t_allow_passwd =TRUE;  //Bu satır ilave edildi orjinali üsteki satır.
 			if( $t_allow_passwd ) { ?>
 				<label for="username" class="block clearfix">
 				<span class="block input-icon input-icon-right">

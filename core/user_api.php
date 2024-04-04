@@ -519,12 +519,13 @@ function user_get_logged_in_user_ids( $p_session_duration_in_minutes ) {
  * @param boolean $p_protected    Whether the account is protected from modifications (default false).
  * @param boolean $p_enabled      Whether the account is enabled.
  * @param string  $p_realname     The realname of the user.
+ * @param string  $p_department   The department of the user.
  * @param string  $p_admin_name   The name of the administrator creating the account.
  * @return string Cookie String
  */
 function user_create( $p_username, $p_password, $p_email = '',
 	$p_access_level = null, $p_protected = false, $p_enabled = true,
-	$p_realname = '', $p_admin_name = '' ) {
+	$p_realname = '', $p_department = '', $p_admin_name = '' ) {
 	if( null === $p_access_level ) {
 		$p_access_level = config_get( 'default_new_account_access_level' );
 	}
@@ -544,11 +545,11 @@ function user_create( $p_username, $p_password, $p_email = '',
 	db_param_push();
 	$t_query = 'INSERT INTO {user}
 				    ( username, email, password, date_created, last_visit,
-				     enabled, access_level, login_count, cookie_string, realname )
+				     enabled, access_level, login_count, cookie_string, realname, department )
 				  VALUES
-				    ( ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param()  . ',
+				    ( ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param()  .  ',' . db_param().',
 				     ' . db_param() . ',' . db_param() . ',' . db_param() . ',' . db_param() . ', ' . db_param() . ')';
-	db_query( $t_query, array( $p_username, $p_email, $t_password, db_now(), db_now(), $c_enabled, (int)$p_access_level, 0, $t_cookie_string, $p_realname ) );
+	db_query( $t_query, array( $p_username, $p_email, $t_password, db_now(), db_now(), $c_enabled, (int)$p_access_level, 0, $t_cookie_string, $p_realname, $p_department ) );
 
 	# Create preferences for the user
 	$t_user_id = db_insert_id( db_get_table( 'user' ) );
@@ -806,6 +807,29 @@ function user_get_id_by_realname( $p_realname, $p_throw = false ) {
 	user_cache_database_result( $t_row );
 	return (int)$t_row['id'];
 }
+/*
+function user_get_id_by_department( $p_department, $p_throw = false ) {
+	if( $t_user = user_search_cache( 'department', $p_department ) ) {
+		return (int)$t_user['id'];
+	}
+
+	db_param_push();
+	$t_query = 'SELECT * FROM {user} WHERE department=' . db_param();
+	$t_result = db_query( $t_query, array( $p_department ) );
+
+	$t_row = db_fetch_array( $t_result );
+
+	if( !$t_row ) {
+		if( $p_throw ) {
+			throw new ClientException( "User department '$p_department' not found", ERROR_USER_BY_NAME_NOT_FOUND, array( $p_department ) );
+		}
+
+		return false;
+	}
+
+	user_cache_database_result( $t_row );
+	return (int)$t_row['id'];
+}*/
 
 /**
  * Get a user id given an array that may have id, name, real_name, email, or name_or_realname.
@@ -964,7 +988,19 @@ function user_get_realname( $p_user_id ) {
 
 	return $t_realname;
 }
+function user_get_department( $p_user_id ) {
+	$t_department = '';
 
+	if( LDAP == config_get_global( 'login_method' ) && ON == config_get( 'use_ldap_department' ) ) {
+		$t_department = ldap_department( $p_user_id );
+	}
+
+	if( is_blank( $t_department ) ) {
+		$t_department = user_get_field( $p_user_id, 'department' );
+	}
+
+	return $t_department;
+}
 /**
  * Return the user's name for display.
  *
@@ -1001,6 +1037,15 @@ function user_show_realname() {
 }
 
 /**
+ * Should realnames be shown to logged in user?
+ *
+ * @return bool true to show, false otherwise.
+ */
+function user_show_department() {
+	return config_get( 'show_department' ) == ON;
+}
+
+/**
  * Return the user's name for display.  If user_show_realname() is true and realname is not empty
  * return realname otherwise return username.
  *
@@ -1011,6 +1056,9 @@ function user_get_name_from_row( array $p_user_row ) {
 	if( user_show_realname() ) {
 		if( !is_blank( $p_user_row['realname'] ) ) {
 			return $p_user_row['realname'];
+		}
+		if(!is_blank( $p_user_row['department'] ) ) {
+			return $p_user_row['department'];
 		}
 	}
 
@@ -1700,6 +1748,15 @@ function user_set_realname( $p_user_id, $p_realname ) {
 	return user_set_field( $p_user_id, 'realname', $p_realname );
 }
 
+/**
+ * Set the user's username to the given string after checking that it is valid
+ * @param integer $p_user_id  A valid user identifier.
+ * @param string  $p_username A valid username to set.
+ * @return boolean
+ */
+function user_set_department( $p_user_id, $p_department ) {
+	return user_set_field( $p_user_id, 'department', $p_department );
+}
 /**
  * Set the user's username to the given string after checking that it is valid
  * @param integer $p_user_id  A valid user identifier.

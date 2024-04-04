@@ -31,6 +31,7 @@ use Mantis\Exceptions\ClientException;
  *     "name": "vboctor",
  *     "password": "p@ssw0rd",
  *     "real_name": "Victor Boctor",
+ * 	   "department": "Bilgi İşlem",
  *     "email": "vboctor@example.com",
  *     "access_level": { "name" => "developer" },
  *     "enabled": true,
@@ -48,6 +49,11 @@ class UserCreateCommand extends Command {
 	 * @var string user real name
 	 */
 	private $realname;
+
+	/**
+	 * @var string user department
+	 */
+	private $department;
 
 	/**
 	 * @var string user email address
@@ -104,6 +110,7 @@ class UserCreateCommand extends Command {
 		# Username and Real Name
 		$this->username = trim( $this->payload( 'name', $this->payload( 'username', '' ) ) );
 		$this->realname = string_normalize( $this->payload( 'real_name', '' ) );
+		$this->department = string_normalize( $this->payload( 'department', '' ) );
 
 		# Protected and Enabled Flags
 		$this->protected = $this->payload( 'protected', false );
@@ -144,6 +151,7 @@ class UserCreateCommand extends Command {
 			$this->protected,
 			$this->enabled,
 			$this->realname,
+			$this->department,
 			$t_admin_name );
 
 		# set language back to user language
